@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+<!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.IManagerDao">
+    <!--定义一个结果集的映射-->
+    <resultMap id="myResultMap" type="com.edusoft.dto.Manager">
+        <result property="id" column="id"/>
+        <result property="realname" column="realname"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+    </resultMap>
+
+    <sql id="filed">
+        id,realname,username,password,phone,address
+    </sql>
+
+    <sql id="tablename">
+        manager
+    </sql>
+
+    <!--boolean add(T t);-->
+    <!--insert into manager(realname,username,password,phone,address)-->
+    <!--values("test","test","test","test","test","test");-->
+    <insert id="add" parameterType="com.edusoft.dto.Manager">
+        INSERT INTO
+        <include refid="tablename"/>
+--         对表的字段进行拼接
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="realname!=null">
+                realname,
+            </if>
+            <if test="username!=null">
+                username,
+            </if>
+            <if test="password!=null">
+                password,
+            </if>
+            <if test="phone!=null">
+                phone,
+            </if>
+            <if test="address!=null">
+                address,
+            </if>
+        </trim>
+
+--          对要插入的值进行拼接
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="realname!=null">
+                #{realname},
+            </if>
+            <if test="username!=null">
+                #{username},
+            </if>
+            <if test="password!=null">
+                #{password},
+            </if>
+            <if test="phone!=null">
+                #{phone},
+            </if>
+
+            <if test="address!=null">
+                #{address},
+            </if>
+        </trim>
+    </insert>
+
+    <!--T findOneByProp(T t);-->
+    <!--select * from manager where username='yan' and password='yanwenzhuang';-->
+    <select id="findOneByProp" parameterType="com.edusoft.dto.Manager" resultMap="myResultMap">
+        SELECT
+        <include refid="filed"/>
+        FROM
+        <include refid="tablename"/>
+        <where>
+            <if test="username!=null">
+                username=#{username}
+            </if>
+            <if test="password!=null">
+                AND password=#{password}
+            </if>
+        </where>
+    </select>
+
+
+
+</mapper>

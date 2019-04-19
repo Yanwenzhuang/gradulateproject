@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/mvc
+            http://www.springframework.org/schema/mvc/spring-mvc.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd ">
+    <!--自动扫描，注入@Service，@Repository,@Component注解bean，并管理其关联-->
+    <context:component-scan base-package="com.edusoft"/>
+
+    <!--0 引入db.properties配置文件-->
+    <bean id="propertyConfiger"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:config/db.properties"/>
+    </bean>
+    <!--<context:property-placeholder location="classpath:config/db.properties"/>-->
+
+    <!--1  创建数据源连接数据库,（用连接池技术）-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+
+        <!--#定义初始连接数-->
+        <property name="initialSize" value="${initialSize}"/>
+        <!--#定义最大连接数-->
+        <property name="maxActive" value="${maxActive}"/>
+        <!--#定义最小空闲-->
+        <property name="minIdle" value="${minIdle}"/>
+        <!--#定义最长等待时间-->
+        <property name="maxWait" value="${maxWait}"/>
+
+    </bean>
+
+    <!--2  创建sqlSessionFactory，生成sqlSession-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--2-1数据源信息-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--2-2映射信息-->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+    </bean>
+
+    <!--3  扫描dao所在的包,spring会自动查找其下的类-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--要扫描哪些持久包dao,以便识别哪些bean-->
+        <!--扫描dao，生成@Mapper注解的接口bean-->
+        <property name="basePackage" value="com.edusoft.dao"/>
+        <!--将接口bean纳入sqlSessionFactory工厂管理-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!--4  配置JDBC事务管理-->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--5  配置基于注解的声明式事务-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>

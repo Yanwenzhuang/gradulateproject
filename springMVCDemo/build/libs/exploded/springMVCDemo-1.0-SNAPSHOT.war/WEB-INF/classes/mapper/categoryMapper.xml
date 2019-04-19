@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+        <!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.ICategoryDao">
+
+    <!--定义一个结果集的映射-->
+    <resultMap id="myResultMap" type="com.edusoft.dto.Category">
+        <result property="id" column="id"/>
+        <result property="text" column="text"/>
+    </resultMap>
+
+
+
+    <sql id="fields">
+        id,text
+    </sql>
+
+    <sql id="tablename">
+        category
+    </sql>
+
+
+    <!--要实现的具体功能用mybatis的标签来标注-->
+    <!--功能名称或方法名称，由id指定-->
+    <!--Category findOneById(String id)-->
+    <!--parameterType:方法的入参类型      resultType:方法的返回值类型-->
+    <!--实现按ID精确查询的功能-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="myResultMap">
+            SELECT
+            <include refid="fields"/>
+            FROM
+            <include refid="tablename"/>
+            WHERE id=#{id}
+    </select>
+
+    <!--实现按参数精确查询的功能-->
+    <select id="findOneByProp" parameterType="java.util.Map" resultMap="myResultMap">
+        SELECT
+        <include refid="fields"/>
+        FROM
+        <include refid="tablename"/>
+--         动态sql
+        <where>
+            <if test="text!=null" >
+                text=#{text}
+            </if>
+        </where>
+    </select>
+
+    <!--分页SQL语句,所有分类-->
+    <!--List<Category> selectCategoryByPage-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <select id="selectCategoryByPage"  resultMap="myResultMap">
+        SELECT
+        id,text
+        FROM category
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有分类数量 -->
+    <!--public long getCategoryCount();-->
+    <select id="getCategoryCount" resultType="long">
+        SELECT COUNT(*) FROM category
+    </select>
+
+    <!--根据参数模糊查询的功能-->
+    <!--List<T> findByProp-->
+    <select id="findByProp" parameterType="java.util.Map" resultMap="myResultMap">
+        SELECT
+        <include refid="fields"/>
+        FROM
+        <include refid="tablename"/>
+        --         动态sql
+        <where>
+            <if test="id!=null" >
+                id LIKE concat(concat('%',#{id}),'%')
+            </if>
+            <if test="text!=null" >
+                AND text LIKE concat(concat('%',#{text}),'%')
+            </if>
+        </where>
+    </select>
+
+
+
+    <!--添加功能-->
+    <!--boolean add(Category t)-->
+    <!--insert into category(text) values(?)-->
+    <insert id="add" parameterType="com.edusoft.dto.Category" >
+        INSERT INTO
+         <include refid="tablename"/>
+--         对表的字段进行拼接
+         <trim prefix="(" suffix=")" suffixOverrides=",">
+             <if test="text!=null">
+                 text,
+             </if>
+         </trim>
+--         对要插入的值进行拼接
+         <trim prefix=" values(" suffix=")" suffixOverrides=",">
+             <if test="text!=null">
+                 #{text},
+             </if>
+         </trim>
+    </insert>
+
+    <!--修改功能-->
+    <!--boolean update(T t)-->
+    <!--update category set text=?,parent=? where id=?-->
+    <update id="update" parameterType="com.edusoft.dto.Category">
+        UPDATE
+        <include refid="tablename"/>
+        <set>
+            <if test="text!=null">
+                text=#{text}
+            </if>
+            WHERE id=#{id}
+        </set>
+    </update>
+
+    <!--删除功能-->
+    <!--delete from category where text ='222';-->
+    <!--boolean delete(T t);-->
+    <delete id="delete" parameterType="com.edusoft.dto.Category">
+        DELETE FROM
+        <include refid="tablename"/>
+        <where>
+            <if test="text!=null">
+                text = #{text}
+            </if>
+        </where>
+    </delete>
+
+
+
+</mapper>

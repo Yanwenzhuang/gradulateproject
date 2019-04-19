@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+<!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.ISellerDao">
+
+    <!--id,realname,username,password,shopname,address,email,phone,logo,regdate-->
+
+    <!--定义一个结果集的映射-->
+    <resultMap id="myResultMap" type="com.edusoft.dto.Seller">
+        <result property="id" column="id"/>
+        <result property="realname" column="realname"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="shopname" column="shopname"/>
+        <result property="address" column="address"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="regdate" column="regdate"/>
+    </resultMap>
+
+    <!--添加功能-->
+    <!--insert into seller(realname,username,password,shopname,address,email,phone) -->
+    <!--values("text","text","text","text","text","text","text","text","text");-->
+    <!--boolean add(T t);-->
+    <insert id="add" parameterType="com.edusoft.dto.Seller">
+        INSERT INTO seller
+--          对要表字段进行拼接
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="realname!=null">
+                realname,
+            </if>
+            <if test="username!=null">
+                username,
+            </if>
+            <if test="password!=null">
+                password,
+            </if>
+            <if test="shopname!=null">
+                shopname,
+            </if>
+            <if test="address!=null">
+                address,
+            </if>
+            <if test="email!=null">
+                email,
+            </if>
+            <if test="phone!=null">
+                phone,
+            </if>
+        </trim>
+--          对要插入的值进行拼接
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="realname!=null">
+                #{realname},
+            </if>
+            <if test="username!=null">
+                #{username},
+            </if>
+            <if test="password!=null">
+                #{password},
+            </if>
+            <if test="shopname!=null">
+                #{shopname},
+            </if>
+            <if test="address!=null">
+                #{address},
+            </if>
+            <if test="email!=null">
+                #{email},
+            </if>
+            <if test="phone!=null">
+                #{phone},
+            </if>
+        </trim>
+
+    </insert>
+
+
+    <!--根据参数精确查询-->
+    <!--select id,realname,username,password,shopname,address,email,phone,logo,regdate -->
+    <!--from seller where username='beifamily' and password='C056Dl/oStNftflbnO6seQ==';-->
+    <!--T findOneByProp(T t);-->
+    <select id="findOneByProp" parameterType="com.edusoft.dto.Seller" resultMap="myResultMap">
+        SELECT
+        id,realname,username,password,shopname,address,email,phone,regdate
+        FROM seller
+        <where>
+            <if test="username!=null">
+                username=#{username}
+            </if>
+            <if test="password!=null">
+                AND password=#{password}
+            </if>
+            <if test="shopname!=null">
+                shopname=#{shopname}
+            </if>
+        </where>
+    </select>
+
+    <!--模糊查询功能-->
+    <!--select id,realname,username,password,shopname,address,email,phone,regdate -->
+    <!--from seller where username like '%e%' ；-->
+    <!--List<T> findByProp(Map map);-->
+    <select id="findByProp" parameterType="java.util.Map" resultMap="myResultMap">
+        SELECT
+        id,realname,username,password,shopname,address,email,phone,regdate
+        FROM seller
+        <where>
+            <if test="id!=null" >
+                id LIKE concat(concat('%',#{id}),'%')
+            </if>
+            <if test="realname!=null">
+                AND realname LIKE concat(concat('%',#{realname}),'%')
+            </if>
+            <if test="password!=null">
+                AND password LIKE concat(concat('%',#{password}),'%')
+            </if>
+            <if test="shopname!=null">
+                AND shopname LIKE concat(concat('%',#{shopname}),'%')
+            </if>
+            <if test="address!=null">
+                AND address LIKE concat(concat('%',#{address}),'%')
+            </if>
+            <if test="email!=null">
+                AND email LIKE concat(concat('%',#{email}),'%')
+            </if>
+            <if test="phone!=null">
+                AND phone LIKE concat(concat('%',#{phone}),'%')
+            </if>
+        </where>
+    </select>
+
+    <!--根据id精确查询-->
+    <!--select id,realname,username,password,shopname,address,email,phone,regdate -->
+    <!--from seller where id="20180912085536042";-->
+    <!--T findOneById(String id);-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="myResultMap">
+        SELECT
+        id,realname,username,password,shopname,address,email,phone,regdate
+        FROM seller
+        WHERE id=#{id}
+    </select>
+
+    <!--更新功能-->
+    <!--realname,password,shopname,address,email,phone,-->
+    <!--update seller set realname="yanwenzhuang" where id="20180915220000070";-->
+    <!--boolean update(T t);-->
+    <update id="update" parameterType="com.edusoft.dto.Seller">
+        UPDATE seller
+        <set>
+            <if test="realname!=null">
+                realname=#{realname},
+            </if>
+            <if test="password!=null">
+                password=#{password},
+            </if>
+            <if test="shopname!=null">
+                shopname=#{shopname},
+            </if>
+            <if test="address!=null">
+                address=#{address},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
+            <if test="phone!=null">
+                phone=#{phone},
+            </if>
+
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <!--分页SQL语句,所有分类-->
+    <!--List<Seller> selectSellerByPage-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <select id="selectSellerByPage"  resultMap="myResultMap">
+        SELECT
+        id,realname,username,password,shopname,address,email,phone,regdate
+        FROM seller
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有分类数量 -->
+    <!--public long getSellerCount();-->
+    <select id="getSellerCount" resultType="long">
+        SELECT COUNT(*) FROM seller
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+<!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.ICustomerDao">
+    <!--定义一个结果集的映射-->
+    <resultMap id="MyResultMap" type="com.edusoft.dto.Customer">
+        <result property="id" column="id"/>
+        <result property="realname" column="realname"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="address" column="address"/>
+        <result property="regDate" column="regDate"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="IDcard" column="IDcard"/>
+    </resultMap>
+
+    <!--id,realname,username,password,address,regDate,email,phone,IDcard-->
+
+    <!--添加功能-->
+    <!--boolean add(T t);-->
+    <!--insert into customer(realname,username,password,address,email,phone,IDcard) -->
+    <!--values("test","test","test","test","t","test","test","test");-->
+    <insert id="add" parameterType="com.edusoft.dto.Customer">
+        INSERT INTO customer
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="realname!=null">
+                realname,
+            </if>
+            <if test="username!=null">
+                username,
+            </if>
+            <if test="password!=null">
+                password,
+            </if>
+            <if test="address!=null">
+                address,
+            </if>
+            <if test="email!=null">
+                email,
+            </if>
+            <if test="phone!=null">
+                phone,
+            </if>
+            <if test="IDcard!=null">
+                IDcard,
+            </if>
+        </trim>
+
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="realname!=null">
+                #{realname},
+            </if>
+            <if test="username!=null">
+                #{username},
+            </if>
+            <if test="password!=null">
+                #{password},
+            </if>
+            <if test="address!=null">
+                #{address},
+            </if>
+            <if test="email!=null">
+                #{email},
+            </if>
+            <if test="phone!=null">
+                #{phone},
+            </if>
+            <if test="IDcard!=null">
+                #{IDcard},
+            </if>
+        </trim>
+    </insert>
+
+    <!--根据参数精确查询-->
+    <!--select id,realname,username,password,address,regDate,email,phone,IDcard-->
+    <!--from customer where username="Eason" and password="C056Dl/oStNftflbnO6seQ==";-->
+    <!--T findOneByProp(T t);-->
+    <select id="findOneByProp" parameterType="com.edusoft.dto.Customer" resultMap="MyResultMap">
+        SELECT
+        id,realname,username,password,address,regDate,email,phone,IDcard
+        FROM customer
+        <where>
+            <if test="username!=null">
+                username=#{username}
+            </if>
+            <if test="password!=null">
+                AND password=#{password}
+            </if>
+        </where>
+
+    </select>
+
+
+    <!--根据参数精确查询-->
+    <!--select id,realname,username,password,address,regDate,email,phone,IDcard-->
+    <!--from customer where id="";-->
+    <!--T findOneById(String id)-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="MyResultMap">
+        SELECT
+        id,realname,username,password,address,regDate,email,phone,IDcard
+        FROM customer
+        WHERE id=#{id}
+    </select>
+
+    <!--模糊查询-->
+    <!--select id,realname,username,password,address,regDate,email,phone,IDcard -->
+    <!--from customer where username like '%i%';-->
+    <!--List<T> findByProp(Map map);-->
+    <select id="findByProp" parameterType="java.util.Map" resultMap="MyResultMap">
+        SELECT
+        id,realname,username,password,address,regDate,email,phone,IDcard
+        FROM customer
+        <where>
+            <if test="id!=null" >
+                id LIKE concat(concat('%',#{id}),'%')
+            </if>
+            <if test="realname!=null">
+                AND realname LIKE concat(concat('%',#{realname}),'%')
+            </if>
+            <if test="username!=null">
+                AND username LIKE concat(concat('%',#{username}),'%')
+            </if>
+            <if test="password!=null">
+                AND password LIKE concat(concat('%',#{password}),'%')
+            </if>
+            <if test="address!=null">
+                AND address LIKE concat(concat('%',#{address}),'%')
+            </if>
+            <if test="beginDate!=null">
+                AND regDate > #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND #{endDate} > regDate
+            </if>
+            <if test="email!=null">
+                AND email LIKE concat(concat('%',#{email}),'%')
+            </if>
+            <if test="phone!=null">
+                AND phone LIKE concat(concat('%',#{phone}),'%')
+            </if>
+            <if test="IDcard!=null">
+                AND IDcard LIKE concat(concat('%',#{IDcard}),'%')
+            </if>
+        </where>
+
+    </select>
+
+    <!--更新功能-->
+    <!--boolean update(T t);-->
+    <!--id,realname,password,address,email,phone,IDcard-->
+    <!--update customer set realname="张杰" where id="20180913225520000";-->
+    <update id="update" parameterType="com.edusoft.dto.Customer">
+        UPDATE customer
+        <set>
+            <if test="id!=null">
+                id=#{id},
+            </if>
+            <if test="realname!=null">
+                realname=#{realname},
+            </if>
+            <if test="password!=null">
+                password=#{password},
+            </if>
+            <if test="address!=null">
+                address=#{address},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
+            <if test="phone!=null">
+                phone=#{phone},
+            </if>
+            <if test="IDcard!=null">
+                IDcard=#{IDcard},
+            </if>
+
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <!--分页SQL语句,所有分类-->
+    <!--List<Customer> selectCustomerByPage-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <select id="selectCustomerByPage"  resultMap="MyResultMap">
+        SELECT
+        id,realname,username,password,address,regDate,email,phone,IDcard
+        FROM customer
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有分类数量 -->
+    <!--public long getCustomerCount();-->
+    <select id="getCustomerCount" resultType="long">
+        SELECT COUNT(*) FROM customer
+    </select>
+
+
+
+</mapper>
+
+
+
+       <!--Customer: id,realname,username,password,address,email,phone,regDate,IDcard-->
+       <!--Seller: id,realname,username,password,address,email,phone,regdate,shopname,url,logo-->

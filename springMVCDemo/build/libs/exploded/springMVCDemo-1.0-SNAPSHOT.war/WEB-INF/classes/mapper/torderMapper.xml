@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+        <!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.ITorderDao">
+
+
+    <!--id,orderTime,customerID,total,receiver,phone,address-->
+
+    <!--定义一个结果集的映射-->
+    <resultMap id="myResultMap" type="com.edusoft.dto.Torder">
+        <result property="id" column="id"/>
+        <result property="orderTime" column="orderTime"/>
+        <result property="goodsCount" column="goodsCount"/>
+        <result property="total" column="total"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="remark" column="remark"/>
+        <result property="state" column="state"/>
+
+        <!--一对一映射-->
+        <association property="customer" javaType="com.edusoft.dto.Customer"
+            column="customerID" select="com.edusoft.dao.ICustomerDao.findOneById"
+        />
+
+    </resultMap>
+
+
+    <!--添加功能-->
+    <!--id,orderTime,customerID,total,receiver,phone,address-->
+    <!--boolean add(T t);-->
+    <!--insert into torder(customerID) values(?)-->
+    <insert id="add" parameterType="com.edusoft.dto.Torder" useGeneratedKeys="true" >
+        INSERT INTO
+        torder
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="total!=null">
+                total,
+            </if>
+            <if test="customer!=null">
+                customerID,
+            </if>
+            <if test="receiver!=null">
+                receiver,
+            </if>
+            <if test="phone!=null">
+                phone,
+            </if>
+            <if test="address!=null">
+                address,
+            </if>
+        </trim>
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="total!=null">
+                #{total},
+            </if>
+            <if test="customer!=null">
+                #{customer.id},
+            </if>
+            <if test="receiver!=null">
+                #{receiver},
+            </if>
+            <if test="phone!=null">
+                #{phone},
+            </if>
+            <if test="address!=null">
+                #{address},
+            </if>
+        </trim>
+        <selectKey resultType="java.lang.String" order="AFTER" keyProperty="id">
+            SELECT MAX(id) FROM torder
+        </selectKey>
+    </insert>
+
+    <!--模糊查询-->
+    <!--List<T> findByProp(Map map);-->
+    <!--select id,orderTime,customerID,total,receiver,phone,address
+    from torder where customerID like '%1322560%';-->
+    <select id="findByProp" parameterType="java.util.Map" resultMap="myResultMap">
+        SELECT
+        id,orderTime,customerID,total,receiver,phone,address
+        FROM torder
+        <where>
+            <if test="id!=null">
+                id LIKE concat(concat('%',#{id}),'%')
+            </if>
+            <if test="customer!=null">
+                customerID = #{customer.id}
+            </if>
+            <if test="total!=null">
+                AND total LIKE concat(concat('%',#{total}),'%')
+            </if>
+        </where>
+    </select>
+
+    <!--根据id精确查询-->
+    <!--T findOneById(String id);-->
+    <!--select id,orderTime,customerID,receiver,address,phone,total-->
+    <!--from torder where id="20180929191212013";-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="myResultMap">
+        SELECT
+        id,orderTime,customerID,receiver,address,phone,total
+        FROM torder
+        WHERE id=#{id}
+    </select>
+
+    <!--根据参数精确查找-->
+    <!--T findOneByProp(T t);-->
+    <!--select id,orderTime,customerID,receiver,address,phone-->
+    <!--from torder where customerID="20180917133932016";-->
+    <select id="findOneByProp" parameterType="com.edusoft.dto.Torder" resultMap="myResultMap">
+        SELECT
+        id,orderTime,customerID,receiver,address,phone
+        FROM torder
+        <where>
+            <if test="customer!=null">
+                customerID=#{customer.id}
+            </if>
+        </where>
+
+    </select>
+
+
+</mapper>

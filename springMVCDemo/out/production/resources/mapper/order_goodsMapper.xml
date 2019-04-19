@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+        <!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.IOrder_goodsDao">
+
+    <!--定义一个结果集的映射-->
+    <resultMap id="myResultMap" type="com.edusoft.dto.Order_goods">
+        <result property="id" column="id"/>
+        <result property="count" column="count"/>
+
+        <!--一对一的映射-->
+        <association property="torder" javaType="com.edusoft.dto.Torder"
+         column="orderID" select="com.edusoft.dao.ITorderDao.findOneById" />
+
+        <association property="goods" javaType="com.edusoft.dto.Goods"
+         column="goodsID" select="com.edusoft.dao.IGoodsDao.findOneById"/>
+    </resultMap>
+
+    <!--id,orderID,goodsID,count-->
+
+    <!--要实现的具体功能用mybatis的标签来标注-->
+    <!--功能名称或方法名称，由id指定-->
+    <!--Order_goods findOneById(String id)-->
+    <!--parameterType:方法的入参类型      resultType:方法的返回值类型-->
+    <!--实现按ID精确查询的功能-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="myResultMap">
+            SELECT
+            id,orderID,goodsID,count
+            FROM
+            order_goods
+            WHERE id=#{id}
+    </select>
+
+    <!--实现按参数精确查询的功能-->
+    <select id="findOneByProp" parameterType="java.util.Map" resultMap="myResultMap">
+        SELECT
+        id,orderID,goodsID,count
+        FROM
+        order_goods
+--         动态sql
+        <where>
+            <if test="id!=null" >
+                id=#{id}
+            </if>
+            <if test="order!=null" >
+                orderID=#{order.id}
+            </if>
+            <if test="goods!=null" >
+                goodsID=#{goods.id}
+            </if>
+            <if test="count!=null" >
+                count=#{count}
+            </if>
+        </where>
+    </select>
+
+
+    <!--根据参数模糊查询的功能-->
+    <!--List<T> findByProp-->
+    <!--select id,orderID,goodsID from order_goods where id like '%58%';-->
+    <select id="findByProp" parameterType="com.edusoft.dto.Order_goods" resultMap="myResultMap">
+        SELECT
+        id,orderID,goodsID,count
+        FROM order_goods
+        <where>
+            <if test="id!=null">
+                id LIKE concat(concat('%',#{id}),'%')
+            </if>
+
+            <if test="torder!=null">
+                orderID = #{torder.id}
+            </if>
+            <if test="goods!=null">
+                AND goodsID = #{goods.id}
+            </if>
+        </where>
+    </select>
+
+
+
+    <!--添加功能-->
+    <!--boolean add(T t);-->
+    <!--id,orderID,goodsID,count-->
+    <!--insert into order_goods(orderID) values(?)-->
+    <insert id="add" parameterType="com.edusoft.dto.Order_goods">
+        INSERT INTO
+         order_goods
+
+         <trim prefix="(" suffix=")" suffixOverrides=",">
+             <if test="torder!=null">
+                 orderID,
+             </if>
+             <if test="goods!=null">
+                 goodsID,
+             </if>
+             <if test="count!=null">
+                 count,
+             </if>
+         </trim>
+
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="torder!=null">
+                #{torder.id},
+            </if>
+            <if test="goods!=null">
+                #{goods.id},
+            </if>
+            <if test="count!=null">
+                #{count},
+            </if>
+        </trim>
+    </insert>
+
+    <!--修改功能-->
+    <!--boolean update(T t)-->
+    <!--update category set text=?,parent=? where id=?-->
+
+
+    <!--删除功能-->
+    <!--delete from category where text ='222';-->
+    <!--boolean delete(T t);-->
+
+    <!--分页SQL语句,所有分类-->
+    <!--List<Order_goods> selectOrderByPage-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <select id="selectOrderByPage"  resultMap="myResultMap">
+        SELECT
+        id,orderID,goodsID,count
+        FROM order_goods
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有分类数量 -->
+    <!--public long getOrderCount();-->
+    <select id="getOrderCount" resultType="long">
+        SELECT COUNT(*) FROM order_goods
+    </select>
+
+
+
+</mapper>

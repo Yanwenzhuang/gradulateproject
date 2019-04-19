@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+        <!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.IShopcar_goodsDao">
+
+    <!--定义一个结果集的映射-->
+    <resultMap id="myResultMap" type="com.edusoft.dto.Shopcar_goods">
+        <result property="id" column="id"/>
+        <result property="count" column="count"/>
+
+        <!--一对一的映射-->
+        <association property="shopcar" javaType="com.edusoft.dto.Shopcar"
+                     column="shopcarID" select="com.edusoft.dao.IShopcarDao.findOneById"/>
+        <association property="goods" javaType="com.edusoft.dto.Goods"
+                     column="goodsID" select="com.edusoft.dao.IGoodsDao.findOneById"/>
+
+    </resultMap>
+
+
+    <!--id,shopcarID,goodsID,name,image,price,count-->
+
+    <!--添加功能-->
+    <!--boolean add(T t);-->
+    <!--INSERT INTO shopcar_goods(shopcarID,goodsID,name,image,price,count)-->
+    <!--values("20180912085536042","20171016112928072","test","test",14,4);-->
+    <insert id="add" parameterType="com.edusoft.dto.Shopcar_goods">
+        INSERT INTO
+        shopcar_goods
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="shopcar!=null">
+                shopcarID,
+            </if>
+            <if test="goods!=null">
+                goodsID,
+            </if>
+            <if test="count!=null">
+                count,
+            </if>
+        </trim>
+
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="shopcar!=null">
+                #{shopcar.id},
+            </if>
+            <if test="goods!=null">
+                #{goods.id},
+            </if>
+            <if test="count!=null">
+                #{count},
+            </if>
+        </trim>
+
+    </insert>
+
+    <!--模糊查询-->
+    <!--List<T> findByProp(Map map);-->
+    <!--select id,shopcarID,goodsID,count from shopcar_goods where name like '% %';-->
+    <select id="findByProp" parameterType="java.util.Map" resultMap="myResultMap">
+        SELECT
+        id,shopcarID,goodsID,count
+        FROM shopcar_goods
+        <where>
+            <if test="shopcar!=null">
+                 shopcarID = #{shopcar.id}
+            </if>
+
+        </where>
+    </select>
+
+    <!--修改功能-->
+    <!--id,shopcarID,goodsID,name,image,price,count-->
+    <!--boolean update(T t)-->
+    <!--update shopcar_goods set count=? where id=?-->
+    <update id="update" parameterType="com.edusoft.dto.Shopcar_goods">
+        UPDATE
+        shopcar_goods
+        <set>
+            <if test="count!=null">
+                count=#{count}
+            </if>
+            WHERE id=#{id}
+        </set>
+    </update>
+
+    <!--T findOneById(String id)-->
+    <!--parameterType:方法的入参类型      resultType:方法的返回值类型-->
+    <!--实现按ID精确查询的功能-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="myResultMap">
+        SELECT
+        id,shopcarID,goodsID,count
+        FROM
+        shopcar_goods
+        WHERE id=#{id}
+    </select>
+
+    <!--删除功能-->
+    <!--boolean delete(T t);-->
+    <!--id,shopcarID,goodsID,name,image,price,count-->
+    <!--DELETE FROM shopcar_goods where id="20180927095005070";-->
+    <delete id="delete" parameterType="com.edusoft.dto.Shopcar_goods">
+        DELETE FROM
+        shopcar_goods
+        <where>
+            <if test="id!=null">
+                id = #{id}
+            </if>
+            <if test="shopcar!=null">
+                AND shopcarID = #{shopcar.id}
+            </if>
+            <if test="goods!=null">
+                AND goodsID = #{goods.id}
+            </if>
+        </where>
+    </delete>
+
+    <!--分页SQL语句,所有分类-->
+    <!--List<Shopcar_goods> selectShopcarByPage-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <select id="selectShopcarByPage"  resultMap="myResultMap">
+        SELECT
+        id,shopcarID,goodsID,count
+        FROM shopcar_goods
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有分类数量 -->
+    <!--public long getShopcarCount();-->
+    <select id="getShopcarCount" resultType="long">
+        SELECT COUNT(*) FROM shopcar_goods
+    </select>
+
+
+
+</mapper>

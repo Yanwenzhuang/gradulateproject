@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace对应接口文件的全限定名，namespace指明此mapper功能实现与哪个接口相关-->
+<!--具体来说，就是mapper要实现那个文件，java功能-->
+<mapper namespace="com.edusoft.dao.IGoodsDao">
+    <!--定义一个结果集的映射-->
+    <resultMap id="MyResultMap" type="com.edusoft.dto.Goods">
+        <result property="id" column="id" />
+        <result property="name" column="name"/>
+        <result property="image" column="image"/>
+        <result property="indate" column="indate"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <!-- 一对一的映射 -->
+        <association property="seller" javaType="com.edusoft.dto.Seller"
+                     column="sellerID" select="com.edusoft.dao.ISellerDao.findOneById"/>
+        <!-- 一对一的映射 -->
+        <association property="category" javaType="com.edusoft.dto.Category"
+                     column="categoryID" select="com.edusoft.dao.ICategoryDao.findOneById"/>
+    </resultMap>
+
+    <!--id,name,image,indate,price,sellerID,categoryID,stock-->
+
+    <!--模糊查询功能-->
+    <!--List<T> findByProp(Map map);-->
+    <!--select id,name,image,indate,price,sellerID,categoryID from goods limit 11,5;-->
+    <!--stock from goods where name like '%te%';-->
+    <select id="findByProp" parameterType="java.util.Map" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        <where>
+            <if test="id!=null">
+                id LIKE concat(concat('%',#{id}),'%')
+            </if>
+            <if test="name!=null">
+                name LIKE concat(concat('%',#{name}),'%')
+            </if>
+            <if test="beginDate!=null">
+                indate > #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND #{endDate} > indate
+            </if>
+            <if test="lowPrice!=null">
+                AND price > #{lowPrice}
+            </if>
+            <if test="highPrice!=null">
+                AND #{highPrice} > price
+            </if>
+            <if test="seller!=null">
+                sellerID = #{seller.id}
+            </if>
+            <if test="category!=null">
+                categoryID = #{category.id}
+            </if>
+            <if test="lowStock!=null">
+                AND stock > #{lowStock}
+            </if>
+            <if test="highStock!=null">
+                AND #{highStock} > stock
+            </if>
+        </where>
+    </select>
+
+    <!--根据商家ID查询商品-->
+    <!--public List<Goods> findGoodsBySeller(String sellerID)-->
+    <select id="findGoodsBySeller" parameterType="java.lang.String" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        WHERE sellerID = #{sellerID}
+    </select>
+
+    <!--根据分类ID查询商品-->
+    <!--public List<Goods> findGoodsByCategory(String categoryID);-->
+    <select id="findGoodsByCategory" parameterType="java.lang.String" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        WHERE categoryID = #{categoryID}
+    </select>
+
+
+    <!--根据id精确查询-->
+    <!--T findOneById(String id);-->
+    <!--select id,name,image,indate,price,sellerID,categoryID,stock -->
+    <!--from goods where id="20171017150008050";-->
+    <select id="findOneById" parameterType="java.lang.String" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        WHERE id=#{id}
+    </select>
+
+    <!--添加功能-->
+    <!--boolean add(T t);-->
+    <!--INSERT INTO goods(name,image,price,sellerID,categoryID,stock)-->
+    <!--values("test","test",34.5,"20180912085536042","20171016112928072",4,"2");-->
+    <insert id="add" parameterType="com.edusoft.dto.Goods">
+        INSERT INTO goods
+--         对于字段的插入
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name!=null">
+                name,
+            </if>
+            <if test="image!=null">
+                image,
+            </if>
+            <if test="price!=null">
+                price,
+            </if>
+            <if test="seller!=null">
+                sellerID,
+            </if>
+            <if test="category!=null">
+                categoryID,
+            </if>
+            <if test="stock!=null">
+                stock,
+            </if>
+
+        </trim>
+
+--         对于值的插入
+        <trim prefix=" values(" suffix=")" suffixOverrides=",">
+            <if test="name!=null">
+                #{name},
+            </if>
+            <if test="image!=null">
+                #{image},
+            </if>
+            <if test="price!=null">
+                #{price},
+            </if>
+            <if test="seller!=null">
+                #{seller.id},
+            </if>
+            <if test="category!=null">
+                #{category.id},
+            </if>
+            <if test="stock!=null">
+                #{stock},
+            </if>
+        </trim>
+
+    </insert>
+
+
+    <!--修改功能-->
+    <!--id,name,image,indate,price,sellerID,categoryID,stock-->
+    <!--boolean update(T t);-->
+    <!--update goods set name="12345678",price="22.5" where id="20180914091033045";-->
+    <update id="update" parameterType="com.edusoft.dto.Goods">
+        UPDATE goods
+        <set>
+            <if test="id!=null">
+                id=#{id},
+            </if>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+            <if test="image!=null">
+                image=#{image},
+            </if>
+            <if test="price!=null">
+                price=#{price},
+            </if>
+            <if test="seller!=null">
+                sellerID=#{seller.id},
+            </if>
+            <if test="category!=null">
+                categoryID=#{category.id},
+            </if>
+            <if test="stock!=null">
+                stock=#{stock},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <!--删除功能-->
+    <!--id,name,image,indate,price,sellerID,categoryID,stock-->
+    <!--boolean delete(T t);-->
+    <!--delete from goods where id="20180915173712088";-->
+    <delete id="delete" parameterType="com.edusoft.dto.Goods">
+        DELETE FROM goods
+        <where>
+            <if test="name!=null">
+                name = #{name}
+            </if>
+        </where>
+    </delete>
+
+    <!--分页SQL语句,所有商品-->
+    <!--List<Goods> selectGoodsByPage-->
+    <!--<bind name="startPos" value="(pageNow-1)*pageSize"></bind>-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <!--select id,name,image,indate,price,sellerID,categoryID from goods limit 0,10;-->
+    <select id="selectGoodsByPage" parameterType="String" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        <where>
+          <if test="name!=null">
+            name LIKE concat(concat('%',#{name}),'%')
+          </if>
+        </where>
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有商品的总个数 -->
+    <!--public long getGoodsCount();-->
+    <!--select count(*) from goods where name like "%name%";-->
+    <select id="getGoodsCount" parameterType="String" resultType="long">
+        SELECT COUNT(*) FROM goods
+        <where>
+          <if test="name!=null">
+              name LIKE concat(concat('%',#{name}),'%')
+          </if>
+        </where>
+    </select>
+
+
+    <!--分页SQL语句,根据分类查询(或商家ID)-->
+    <!--List<Goods> selectGoodsByPage-->
+    <!--<bind name="startPos" value="(pageNow-1)*pageSize"></bind>-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <!--select id,name,image,indate,price,sellerID,categoryID from goods limit 0,10;-->
+    <select id="selectGoodsByCategory" parameterType="String" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        <where>
+            <if test="categoryID!=null">
+                categoryID = #{categoryID}
+            </if>
+            <if test="sellerID!=null">
+                AND sellerID = #{sellerID}
+            </if>
+        </where>
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有商品的总个数 -->
+    <!--public long getGoodsCount();-->
+    <!--select count(*) from goods where name like "%name%";-->
+    <select id="getCatogoryGoodsCount" parameterType="String" resultType="long">
+        SELECT COUNT(*) FROM goods
+        <where>
+            <if test="categoryID!=null">
+                categoryID = #{categoryID}
+            </if>
+            <if test="sellerID!=null">
+                AND sellerID = #{sellerID}
+            </if>
+        </where>
+    </select>
+
+    <!--分页SQL语句,根据分类查询(或商家ID)-->
+    <!--List<Goods> selectGoodsBySeller-->
+    <!--<bind name="startPos" value="(pageNow-1)*pageSize"></bind>-->
+    <!--(@Param(value="startPos") Integer startPos,@Param(value="pageSize") Integer pageSize)-->
+    <!--select id,name,image,indate,price,sellerID,categoryID from goods limit 0,10;-->
+    <select id="selectGoodsBySeller" parameterType="String" resultMap="MyResultMap">
+        SELECT
+        id,name,image,indate,price,sellerID,categoryID,stock
+        FROM goods
+        <where>
+            <if test="categoryID!=null">
+                categoryID = #{categoryID}
+            </if>
+            <if test="sellerID!=null">
+                sellerID = #{sellerID}
+            </if>
+        </where>
+        limit  #{startPos},#{pageSize}
+    </select>
+
+    <!-- 取得所有商品的总个数 -->
+    <!--public long getSellerCount();-->
+    <!--select count(*) from goods where name like "%name%";-->
+    <select id="getSellerCount" parameterType="String" resultType="long">
+        SELECT COUNT(*) FROM goods
+        <where>
+            <if test="categoryID!=null">
+                categoryID = #{categoryID}
+            </if>
+            <if test="sellerID!=null">
+                sellerID = #{sellerID}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>
